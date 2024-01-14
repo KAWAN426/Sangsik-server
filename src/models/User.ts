@@ -1,5 +1,14 @@
-import generateUniqueUserId from "@/utils/uniqueIdGenerator";
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
+
+interface IUser extends Document {
+  _id: string;
+  name: string;
+  email: string;
+  picture?: string;
+  loginMethod: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 const userSchema = new mongoose.Schema(
   {
@@ -28,7 +37,5 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.index({ _id: 1 });
-
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model<IUser>("User", userSchema);
 export default User;

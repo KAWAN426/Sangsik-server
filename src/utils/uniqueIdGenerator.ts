@@ -1,6 +1,6 @@
 import { Model } from "mongoose";
 
-function generateUniqueId(length = 10) {
+function generateId(length = 10) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
   let result = "";
@@ -11,9 +11,9 @@ function generateUniqueId(length = 10) {
   return result;
 }
 
-export default async function generateUniqueUserId(Model: Model<any, any>, length = 10) {
+export default async function generateUID(Model: Model<any, any>, length = 10) {
   while (true) {
-    const uniqueId = generateUniqueId(length);
+    const uniqueId = generateId(length);
     const existingUser = await Model.findOne({ uniqueId });
     if (!existingUser) return uniqueId;
   }

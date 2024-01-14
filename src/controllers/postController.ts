@@ -1,0 +1,186 @@
+import Post from "@/models/Post";
+import User from "@/models/User";
+import { TypedRequest, TypedResponse } from "@/types/express";
+
+export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
+  try {
+    const post = await Post.findById(req.params.id).populate("authorId").exec();
+    if (!post)
+      return res.status(404).send({
+        data: post,
+        message: "해당하는 포스트를 못했습니다.",
+        status: "success",
+      });
+
+    const responseData = {
+      ...post.toObject(),
+      likes: post.likes.length,
+      bookmarks: post.bookmarks.length,
+    };
+
+    res.status(200).send({
+      data: responseData,
+      message: "포스트의 정보를 성공적으로 불러왔습니다.",
+      status: "success",
+    });
+  } catch (err) {
+    res.status(500).send({
+      data: null,
+      message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const getLatestPosts = async (
+  req: TypedRequest,
+  res: TypedResponse,
+  filter: Object = {}
+) => {
+  try {
+    const latestPosts = await Post.aggregate([
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" },
+          bookmarksCount: { $size: "$bookmarks" },
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $match: filter },
+      { $project: { bookmarks: 0, likes: 0 } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "authorId",
+          foreignField: "_id",
+          as: "author",
+        },
+      },
+    ]);
+
+    res.status(200).send({
+      data: latestPosts,
+      message: "최신순 포스트의 정보를 성공적으로 불러왔습니다.",
+      status: "success",
+    });
+  } catch (error) {
+    res.status(500).send({
+      data: null,
+      message: "최신순 포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const getPopularPosts = async (
+  req: TypedRequest,
+  res: TypedResponse,
+  filter: Object = {}
+) => {
+  try {
+    const popularPosts = await Post.aggregate([
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" },
+          bookmarksCount: { $size: "$bookmarks" },
+        },
+      },
+      { $sort: { likesCount: -1 } },
+      { $match: filter },
+      { $project: { bookmarks: 0, likes: 0 } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "authorId",
+          foreignField: "_id",
+          as: "author",
+        },
+      },
+    ]);
+
+    res.status(200).send({
+      data: popularPosts,
+      message: "인기순 포스트의 정보를 성공적으로 불러왔습니다.",
+      status: "success",
+    });
+  } catch (error) {
+    res.status(500).send({
+      data: null,
+      message: "인기순 포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const togglePostLike = async (req: TypedRequest, res: TypedResponse) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post)
+      return res.status(404).send({
+        data: post,
+        message: "해당하는 포스트를 못했습니다.",
+        status: "success",
+      });
+
+    const user = await User.findById(req.params.userId);
+    if (!user)
+      return res.status(404).send({
+        data: null,
+        message: "사용자를 찾지 못했습니다.",
+        status: "success",
+      });
+
+    post.toggleLike(req.params.userId);
+    await post.save();
+
+    res.status(200).send({
+      data: { likes: post.likes.length },
+      message: "좋아요를 성공적으로 수정했습니다.",
+      status: "success",
+    });
+  } catch (err) {
+    res.status(500).send({
+      data: null,
+      message: "좋아요를 수정하는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const togglePostBookmark = async (
+  req: TypedRequest,
+  res: TypedResponse
+) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post)
+      return res.status(404).send({
+        data: null,
+        message: "해당하는 포스트를 못했습니다.",
+        status: "success",
+      });
+
+    const user = await User.findById(req.params.userId);
+    if (!user)
+      return res.status(404).send({
+        data: null,
+        message: "사용자를 찾지 못했습니다.",
+        status: "success",
+      });
+
+    post.toggleBookmark(req.params.userId);
+    await post.save();
+
+    res.status(200).send({
+      data: { bookmarks: post.bookmarks.length },
+      message: "북마크를 성공적으로 수정했습니다.",
+      status: "success",
+    });
+  } catch (err) {
+    res.status(500).send({
+      data: null,
+      message: "북마크를 수정하는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};

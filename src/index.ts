@@ -5,6 +5,7 @@ import cors from "@/middleware/cors";
 import mongodbConfig from "./mongodb/config";
 import userRoutes from "@/routers/UserRoutes";
 import imageRoutes from "@/routers/ImageRoutes";
+import OpenAI from "openai";
 
 dotenv.config();
 
@@ -15,7 +16,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors);
 app.use(helmet());
 
-app.get("/", (_, res) => {
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+});
+
+const callGpt35 = async () => {
+  const chatCompletion = await openai.chat.completions.create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "gpt-3.5-turbo",
+  });
+  console.log(chatCompletion);
+};
+
+app.get("/ai", async (_, res) => {
+  await callGpt35();
   res.send("OK");
 });
 
