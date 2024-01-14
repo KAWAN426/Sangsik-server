@@ -4,7 +4,7 @@ import mongoose, { Document } from "mongoose";
 interface IPost extends Document {
   _id: string;
   title: string;
-  contents: string;
+  content: string;
   previewImage?: string;
   authorId: string;
   likes: string[];
@@ -26,7 +26,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    contents: {
+    content: {
       type: String,
       required: true,
     },

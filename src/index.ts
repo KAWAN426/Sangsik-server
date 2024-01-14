@@ -17,19 +17,20 @@ app.use(cors);
 app.use(helmet());
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+  apiKey: process.env.OPENAI_API_KEY,
+  organization: process.env.OPENAI_API_ORGANIZATION,
 });
 
-const callGpt35 = async () => {
-  const chatCompletion = await openai.chat.completions.create({
-    messages: [{ role: "user", content: "Say this is a test" }],
+async function runAI() {
+  const completion = await openai.chat.completions.create({
+    messages: [{ role: "system", content: "You are a helpful assistant." }],
     model: "gpt-3.5-turbo",
   });
-  console.log(chatCompletion);
-};
+  console.log(completion);
+}
 
 app.get("/ai", async (_, res) => {
-  await callGpt35();
+  await runAI();
   res.send("OK");
 });
 

@@ -8,7 +8,7 @@ export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
     if (!post)
       return res.status(404).send({
         data: post,
-        message: "해당하는 포스트를 못했습니다.",
+        message: "해당하는 포스트를 찾지 못했습니다.",
         status: "success",
       });
 
@@ -118,12 +118,12 @@ export const togglePostLike = async (req: TypedRequest, res: TypedResponse) => {
     if (!post)
       return res.status(404).send({
         data: post,
-        message: "해당하는 포스트를 못했습니다.",
+        message: "해당하는 포스트를 찾지 못했습니다.",
         status: "success",
       });
 
-    const user = await User.findById(req.params.userId);
-    if (!user)
+    const userExists = await User.exists({ _id: req.params.userId });
+    if (!userExists)
       return res.status(404).send({
         data: null,
         message: "사용자를 찾지 못했습니다.",
@@ -160,8 +160,8 @@ export const togglePostBookmark = async (
         status: "success",
       });
 
-    const user = await User.findById(req.params.userId);
-    if (!user)
+    const userExists = await User.exists({ _id: req.params.userId });
+    if (!userExists)
       return res.status(404).send({
         data: null,
         message: "사용자를 찾지 못했습니다.",
@@ -183,4 +183,30 @@ export const togglePostBookmark = async (
       status: "error",
     });
   }
+};
+
+export const createPost = async (
+  req: TypedRequest<
+    {},
+    { title: string; content: string; previewImage?: string; authorId: string }
+  >,
+  res: TypedResponse
+) => {
+  const { title, content, previewImage, authorId } = req.body;
+  const newPost = new Post({
+    title,
+    content,
+    previewImage,
+    authorId,
+    likes: [],
+    bookmarks: [],
+  });
+
+  await newPost.save();
+
+  res.status(200).send({
+    data: null,
+    message: `새로운 포스트를 생성했습니다. id:${newPost._id}`,
+    status: "success",
+  });
 };
