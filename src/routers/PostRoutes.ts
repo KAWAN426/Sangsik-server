@@ -3,28 +3,51 @@ import * as PostController from "@/controllers/postController";
 
 const router = Router();
 
+//* desc 특정 id의 포스트 데이터 얻어옴
+//* params: { id: string }
 router.get("/:id", PostController.getPostOne);
+
+//* desc 모든 포스트 최신순 정렬
 router.get("/latest", PostController.getLatestPosts);
+
+//* desc 모든 포스트 중에서 좋아요 순 정렬
 router.get("/popular", PostController.getPopularPosts);
-router.get("/user/likes/:userId", (req, res) =>
-  PostController.getPopularPosts(req, res, { authorId: req.params.userId })
+
+//* desc 특정 사용자가 북마크한 포스트를 인기순으로 정렬
+//* params: { userId: string }
+router.get("/user/bookmarks/:userId", (req, res) =>
+  PostController.getPopularPosts(req, res, {
+    bookmarks: { $in: [req.params.userId] },
+  })
 );
 
-//* params { postId: string, userId: string }
+//* desc 특정 사용자의 포스트를 최신순으로 정렬
+//* params: { postId: string, userId: string }
 router.get("/user/:userId", (req, res) =>
   PostController.getLatestPosts(req, res, { authorId: req.params.userId })
 );
 
-//* params { postId: string, userId: string }
+//* desc 포스트의 좋아요 수정
+//* params: { postId: string, userId: string }
 router.put("/toggle/like/:postId/:userId", PostController.togglePostLike);
 
-//* params { postId: string, userId: string }
+//* desc 포스트의 북마드 수정
+//* params: { postId: string, userId: string }
 router.put(
   "/toggle/bookmark/:postId/:userId",
   PostController.togglePostBookmark
 );
 
-//* body { title: string, content: string, previewImage?: string, authorId: string }
+//* desc 새 포스트 생성
+//* body: { title: string, content: string, previewImage?: string, authorId: string }
 router.post("/", PostController.createPost);
+
+//* desc 포스트 내용 업데이트
+//* body: { title: string, content: string, previewImage?: string }, params: { id: string }
+router.put("/:id", PostController.updatePost);
+
+//* desc 포스트 제거
+//* params: { id: string }
+router.delete("/:id", PostController.deletePost);
 
 export default router;

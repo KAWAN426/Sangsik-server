@@ -192,21 +192,97 @@ export const createPost = async (
   >,
   res: TypedResponse
 ) => {
-  const { title, content, previewImage, authorId } = req.body;
-  const newPost = new Post({
-    title,
-    content,
-    previewImage,
-    authorId,
-    likes: [],
-    bookmarks: [],
-  });
+  try {
+    const { title, content, previewImage, authorId } = req.body;
+    const newPost = new Post({
+      title,
+      content,
+      previewImage,
+      authorId,
+      likes: [],
+      bookmarks: [],
+    });
 
-  await newPost.save();
+    const result = await newPost.save();
 
-  res.status(200).send({
-    data: null,
-    message: `새로운 포스트를 생성했습니다. id:${newPost._id}`,
-    status: "success",
-  });
+    if (result && result._id) {
+      res.status(200).send({
+        data: null,
+        message: `새로운 포스트를 생성했습니다. id:${newPost._id}`,
+        status: "success",
+      });
+    } else {
+      res.status(400).send({
+        data: null,
+        message: `새로운 포스트를 생성하는데 실패했습니다.`,
+        status: "success",
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      data: null,
+      message: "새로운 포스트를 생성하는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const updatePost = async (
+  req: TypedRequest<
+    {},
+    { title?: string; content?: string; previewImage?: string }
+  >,
+  res: TypedResponse
+) => {
+  try {
+    const { title, content, previewImage } = req.body;
+    const result = await Post.updateOne(
+      { _id: req.params.id },
+      { $set: { title, content, previewImage } }
+    );
+    if (result.modifiedCount === 1) {
+      res.status(200).send({
+        data: null,
+        message: `성공적으로 포스트를 수정했습니다.`,
+        status: "success",
+      });
+    } else {
+      res.status(400).send({
+        data: null,
+        message: `포스트를 수정하는데 실패했습니다.`,
+        status: "success",
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      data: null,
+      message: "포스트를 수정하는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const deletePost = async (req: TypedRequest, res: TypedResponse) => {
+  try {
+    const result = await Post.deleteOne({ _id: req.params.id });
+    if (result.deletedCount === 1) {
+      res.status(200).send({
+        data: null,
+        message: `성공적으로 포스트를 제거했습니다.`,
+        status: "success",
+      });
+    } else {
+      res.status(400).send({
+        data: null,
+        message: `포스트를 제거하지 못했습니다.`,
+        status: "success",
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      data: null,
+      message: "포스트를 제거하는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
 };
