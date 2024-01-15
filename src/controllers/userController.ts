@@ -1,3 +1,4 @@
+import { getGoogleLoginInfo } from "@/lib/googleLogin";
 import User from "@/models/User";
 import { TypedRequest, TypedResponse } from "@/types/express";
 
@@ -23,4 +24,48 @@ export const getUser = async (req: TypedRequest, res: TypedResponse) => {
       status: "error",
     });
   }
+};
+
+export const loginUser = async (
+  req: TypedRequest<{}, { token: string }>,
+  res: TypedResponse
+) => {
+  const token = req.body.token;
+
+  const googleInfo = await getGoogleLoginInfo(token);
+  if (!googleInfo)
+    return res.status(500).send({
+      data: null,
+      message: "구글 로그인 정보를 가져오고 토큰을 만드는데 실패했습니다.",
+      status: "error",
+    });
+  const { payload, userToken } = googleInfo;
+  const { sub, name, email, picture } = payload;
+
+  const userData = {
+    id: sub,
+    name,
+    email,
+    picture,
+    loginMethod: "google",
+    externalId: sub,
+  };
+
+  const result = await User.findOneAndUpdate({ _id: sub }, userData, {
+    new: true,
+    upsert: true,
+  });
+
+  if (!result || !userToken)
+    return res.status(500).send({
+      data: null,
+      status: "error",
+      message: "구글 로그인 정보를 가져오는데 실패했습니다.",
+    });
+
+  res.status(200).send({
+    data: { userToken },
+    status: "success",
+    message: "구글 로그인용 토큰을 생성하는데 성공했습니다.",
+  });
 };

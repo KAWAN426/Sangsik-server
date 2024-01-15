@@ -1,7 +1,7 @@
 import multer from "multer";
 import sharp from "sharp";
 import { Readable } from "stream";
-import s3 from "@/s3";
+import s3 from "@/lib/s3";
 import { Request, Response } from "express";
 
 const storage = multer.memoryStorage();

@@ -1,3 +1,4 @@
+import openai from "@/lib/openai";
 import Post from "@/models/Post";
 import User from "@/models/User";
 import { TypedRequest, TypedResponse } from "@/types/express";
@@ -194,6 +195,21 @@ export const createPost = async (
 ) => {
   try {
     const { title, content, previewImage, authorId } = req.body;
+
+    const q = `제목: ${title}, 내용: ${content}}`;
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `다음 대괄호 안의 내용의 제목과 내용은 정보를 알려주는 내용입니다.
+          내용을 판단해서 틀린 정보가 있다면 false와 어디서부터 어디까지가 틀렸는지를 알려주고 부가적인 설명은 붙이지 말아주세요. 
+          만약 내용이 적당히 옳바른 내용이라면 오직 true만을 보내주고 부가적인 설명을 붙이지 말아주세요.
+          [ ${q} ]`,
+        },
+      ],
+      model: "gpt-3.5-turbo",
+    });
+
     const newPost = new Post({
       title,
       content,
@@ -207,7 +223,9 @@ export const createPost = async (
 
     if (result && result._id) {
       res.status(200).send({
-        data: null,
+        data: {
+          message: completion.choices[0].message,
+        },
         message: `새로운 포스트를 생성했습니다. id:${newPost._id}`,
         status: "success",
       });

@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    externalId: {
+      type: String,
+      required: false,
+    },
   },
   { timestamps: true }
 );
