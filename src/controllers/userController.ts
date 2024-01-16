@@ -43,7 +43,7 @@ export const loginUser = async (
   const { sub, name, email, picture } = payload;
 
   const userData = {
-    id: sub,
+    _id: sub,
     name,
     email,
     picture,
@@ -65,6 +65,37 @@ export const loginUser = async (
 
   res.status(200).send({
     data: { userToken },
+    status: "success",
+    message: "구글 로그인용 토큰을 생성하는데 성공했습니다.",
+  });
+};
+
+export const createUser = async (
+  req: TypedRequest<{}, {}>,
+  res: TypedResponse
+) => {
+  const userData = {
+    _id: "65a574fcf98fb95d7bfafd86",
+    name: "Kawan0426",
+    email: "cwstbp0426@gmail.com",
+    picture:
+      "https://yt3.ggpht.com/yti/AGOGRCoQygByYr5MvP4_coveyCKZUmjDWgF6XFuWfyDrqA=s88-c-k-c0x00ffffff-no-rj",
+    loginMethod: "google",
+    externalId: "65a574fcf98fb95d7bfafd86",
+  };
+
+  const result = await User.findOneAndUpdate(
+    { _id: "65a574fcf98fb95d7bfafd86" },
+    userData,
+    {
+      new: true,
+      upsert: true,
+      includeResultMetadata: true,
+    }
+  );
+
+  res.status(200).send({
+    data: result,
     status: "success",
     message: "구글 로그인용 토큰을 생성하는데 성공했습니다.",
   });

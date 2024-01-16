@@ -5,7 +5,7 @@ const mongodbConfig = async () => {
   if (!ATLAS_URI) return;
   await mongoose
     .connect(ATLAS_URI, {
-      dbName: "10man",
+      dbName: "sangsiksun",
       useNewUrlParser: true,
       useUnifiedTopology: true,
     } as ConnectOptions)

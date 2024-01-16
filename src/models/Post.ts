@@ -1,4 +1,3 @@
-import generateUID from "@/utils/uniqueIdGenerator";
 import mongoose, { Document } from "mongoose";
 
 interface IPost extends Document {
@@ -9,6 +8,8 @@ interface IPost extends Document {
   authorId: string;
   likes: string[];
   bookmarks: string[];
+  likeCount: number;
+  bookmarkCount: number;
   toggleLike: (userId: string) => void;
   toggleBookmark: (userId: string) => void;
   createdAt: Date;
@@ -20,7 +21,7 @@ const postSchema = new mongoose.Schema(
     _id: {
       type: String,
       unique: true,
-      default: async () => await generateUID(Post, 10),
+      required: true,
     },
     title: {
       type: String,
@@ -39,20 +40,16 @@ const postSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
-    likes: [
-      {
-        type: String,
-        ref: "User",
-        unique: true,
-      },
-    ],
-    bookmarks: [
-      {
-        type: String,
-        ref: "User",
-        unique: true,
-      },
-    ],
+    likes: [String],
+    bookmarks: [String],
+    likeCount: {
+      type: Number,
+      required: true,
+    },
+    bookmarkCount: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );
@@ -64,6 +61,7 @@ postSchema.methods.toggleLike = function (userId: string) {
   } else {
     this.likes.splice(index, 1);
   }
+  this.likeCount = this.likes.length;
 };
 
 postSchema.methods.toggleBookmark = function (userId: string) {
@@ -73,6 +71,7 @@ postSchema.methods.toggleBookmark = function (userId: string) {
   } else {
     this.bookmarks.splice(index, 1);
   }
+  this.bookmarkCount = this.bookmarks.length;
 };
 
 const Post = mongoose.model<IPost>("Post", postSchema);

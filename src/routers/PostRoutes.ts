@@ -5,7 +5,7 @@ const router = Router();
 
 //* desc 특정 id의 포스트 데이터 얻어옴
 //* params: { id: string }
-router.get("/:id", PostController.getPostOne);
+router.get("/one/:id", PostController.getPostOne);
 
 //* desc 모든 포스트 최신순 정렬
 router.get("/latest", PostController.getLatestPosts);
@@ -44,10 +44,10 @@ router.post("/", PostController.createPost);
 
 //* desc 포스트 내용 업데이트
 //* body: { title: string, content: string, previewImage?: string }, params: { id: string }
-router.put("/:id", PostController.updatePost);
+router.put("/update/:id", PostController.updatePost);
 
 //* desc 포스트 제거
 //* params: { id: string }
-router.delete("/:id", PostController.deletePost);
+router.delete("/delete/:id", PostController.deletePost);
 
 export default router;

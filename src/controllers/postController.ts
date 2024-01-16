@@ -2,6 +2,9 @@ import openai from "@/lib/openai";
 import Post from "@/models/Post";
 import User from "@/models/User";
 import { TypedRequest, TypedResponse } from "@/types/express";
+import generateUID from "@/utils/uniqueIdGenerator";
+import { compressString } from "@/utils/zipString";
+import cheerio from "cheerio";
 
 export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
   try {
@@ -39,25 +42,11 @@ export const getLatestPosts = async (
   filter: Object = {}
 ) => {
   try {
-    const latestPosts = await Post.aggregate([
-      {
-        $addFields: {
-          likesCount: { $size: "$likes" },
-          bookmarksCount: { $size: "$bookmarks" },
-        },
-      },
-      { $sort: { createdAt: -1 } },
-      { $match: filter },
-      { $project: { bookmarks: 0, likes: 0 } },
-      {
-        $lookup: {
-          from: "users",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "author",
-        },
-      },
-    ]);
+    const latestPosts = await Post.find()
+      .sort([["createdAt", -1]])
+      .populate("authorId")
+      .exec();
+    console.log(latestPosts);
 
     res.status(200).send({
       data: latestPosts,
@@ -65,6 +54,7 @@ export const getLatestPosts = async (
       status: "success",
     });
   } catch (error) {
+    console.log(error);
     res.status(500).send({
       data: null,
       message: "최신순 포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
@@ -79,25 +69,10 @@ export const getPopularPosts = async (
   filter: Object = {}
 ) => {
   try {
-    const popularPosts = await Post.aggregate([
-      {
-        $addFields: {
-          likesCount: { $size: "$likes" },
-          bookmarksCount: { $size: "$bookmarks" },
-        },
-      },
-      { $sort: { likesCount: -1 } },
-      { $match: filter },
-      { $project: { bookmarks: 0, likes: 0 } },
-      {
-        $lookup: {
-          from: "users",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "author",
-        },
-      },
-    ]);
+    const popularPosts = await Post.find()
+      .sort("likeCount")
+      .populate("authorId")
+      .exec();
 
     res.status(200).send({
       data: popularPosts,
@@ -196,27 +171,33 @@ export const createPost = async (
   try {
     const { title, content, previewImage, authorId } = req.body;
 
-    const q = `제목: ${title}, 내용: ${content}}`;
+    const doc = cheerio.load(content);
+
+    doc("h1").remove();
+
+    const q = `제목: ${title}, 내용: ${doc.text()}}`;
     const completion = await openai.chat.completions.create({
       messages: [
         {
-          role: "system",
-          content: `다음 대괄호 안의 내용의 제목과 내용은 정보를 알려주는 내용입니다.
-          내용을 판단해서 틀린 정보가 있다면 false와 어디서부터 어디까지가 틀렸는지를 알려주고 부가적인 설명은 붙이지 말아주세요. 
-          만약 내용이 적당히 옳바른 내용이라면 오직 true만을 보내주고 부가적인 설명을 붙이지 말아주세요.
-          [ ${q} ]`,
+          role: "user",
+          content: `다음 내용에서 확실하게 틀린 부분이 있다면 false, [틀린 부분] 이런 형식으로 작성해서 알려주고 만약 내용이 어느정도 옳바르면 true만을 전달해줘. ${q}`,
         },
       ],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4",
     });
 
+    const _id = await generateUID(Post, 10);
+
     const newPost = new Post({
+      _id,
       title,
-      content,
-      previewImage,
+      content: compressString(content),
+      previewImage: previewImage ?? null,
       authorId,
       likes: [],
       bookmarks: [],
+      likeCount: 0,
+      bookmarkCount: 0,
     });
 
     const result = await newPost.save();
@@ -224,9 +205,9 @@ export const createPost = async (
     if (result && result._id) {
       res.status(200).send({
         data: {
-          message: completion.choices[0].message,
+          ai: completion.choices[0].message.content?.toLowerCase(),
         },
-        message: `새로운 포스트를 생성했습니다. id:${newPost._id}`,
+        message: `새로운 포스트를 생성했습니다. id:${_id}`,
         status: "success",
       });
     } else {
@@ -237,6 +218,7 @@ export const createPost = async (
       });
     }
   } catch (err) {
+    console.log(err);
     res.status(500).send({
       data: null,
       message: "새로운 포스트를 생성하는 과정에서 오류가 발생했습니다.",

@@ -11,4 +11,6 @@ router.get("/:id", UserController.getUser);
 //* body: { token: string }
 router.post("/", UserController.loginUser);
 
+router.post("/create", UserController.createUser);
+
 export default router;

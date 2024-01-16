@@ -5,6 +5,7 @@ import cors from "@/middleware/cors";
 import mongodbConfig from "@/lib/mongodb/config";
 import userRoutes from "@/routers/UserRoutes";
 import imageRoutes from "@/routers/ImageRoutes";
+import postRoutes from "@/routers/PostRoutes";
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ app.use(helmet());
 //       {
 //         role: "system",
 //         content: `다음 대괄호 안의 내용의 제목과 내용은 정보를 알려주는 내용입니다.
-//           내용을 판단해서 틀린 정보가 있다면 false와 어디서부터 어디까지가 틀렸는지를 알려주고 부가적인 설명은 붙이지 말아주세요. 
+//           내용을 판단해서 틀린 정보가 있다면 false와 어디서부터 어디까지가 틀렸는지를 알려주고 부가적인 설명은 붙이지 말아주세요.
 //           만약 내용이 적당히 옳바른 내용이라면 오직 true만을 보내주고 부가적인 설명을 붙이지 말아주세요.
 //           [ ${q} ]`,
 //       },
@@ -35,6 +36,7 @@ app.use(helmet());
 // }
 
 app.use("/api/user", userRoutes);
+app.use("/api/post", postRoutes);
 app.use("/api/image", imageRoutes);
 
 app.listen(process.env.PORT || 8080, async () => {
