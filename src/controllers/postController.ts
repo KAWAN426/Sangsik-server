@@ -24,7 +24,7 @@ export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
 
     res.status(200).send({
       data: responseData,
-      message: "포스트의 정보를 성공적으로 불러왔습니다.",
+      message: "포스트의 정보를 성공적으로 불러왔습니다.11111",
       status: "success",
     });
   } catch (err) {
@@ -46,11 +46,10 @@ export const getLatestPosts = async (
       .sort([["createdAt", -1]])
       .populate("authorId")
       .exec();
-    console.log(latestPosts);
 
     res.status(200).send({
       data: latestPosts,
-      message: "최신순 포스트의 정보를 성공적으로 불러왔습니다.",
+      message: "최신순 포스트의 정보를 성공적으로 불러왔습니다.1",
       status: "success",
     });
   } catch (error) {
