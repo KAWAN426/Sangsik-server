@@ -16,14 +16,8 @@ export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
         status: "success",
       });
 
-    const responseData = {
-      ...post.toObject(),
-      likes: post.likes.length,
-      bookmarks: post.bookmarks.length,
-    };
-
     res.status(200).send({
-      data: responseData,
+      data: post,
       message: "포스트의 정보를 성공적으로 불러왔습니다.11111",
       status: "success",
     });
@@ -69,7 +63,7 @@ export const getPopularPosts = async (
 ) => {
   try {
     const popularPosts = await Post.find()
-      .sort("likeCount")
+      .sort([["likeCount", -1]])
       .populate("authorId")
       .exec();
 
