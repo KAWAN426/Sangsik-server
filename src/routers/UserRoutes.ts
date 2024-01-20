@@ -9,7 +9,7 @@ router.get("/:id", UserController.getUser);
 
 //* desc 사용자의 token으로 페이로드를 얻어옴
 //* body: { token: string }
-router.post("/", UserController.loginUser);
+// router.post("/", UserController.loginUser);
 
 router.post("/create", UserController.createUser);
 
