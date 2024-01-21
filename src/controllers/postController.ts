@@ -1,4 +1,4 @@
-// import openai from "@/lib/openai";
+import openai from "@/lib/openai";
 import Post from "@/models/Post";
 import User from "@/models/User";
 import { TypedRequest, TypedResponse } from "@/types/express";
@@ -18,7 +18,7 @@ export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
 
     res.status(200).send({
       data: post,
-      message: "포스트의 정보를 성공적으로 불러왔습니다.11111",
+      message: "포스트의 정보를 성공적으로 불러왔습니다.",
       status: "success",
     });
   } catch (err) {
@@ -36,21 +36,21 @@ export const getLatestPosts = async (
   filter: Object = {}
 ) => {
   try {
-    const latestPosts = await Post.find()
+    const latestPosts = await Post.find(filter)
       .sort([["createdAt", -1]])
       .populate("authorId")
       .exec();
 
     res.status(200).send({
       data: latestPosts,
-      message: "최신순 포스트의 정보를 성공적으로 불러왔습니다.1",
+      message: "포스트의 정보를 성공적으로 불러왔습니다.1",
       status: "success",
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       data: null,
-      message: "최신순 포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
+      message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
       status: "error",
     });
   }
@@ -62,20 +62,20 @@ export const getPopularPosts = async (
   filter: Object = {}
 ) => {
   try {
-    const popularPosts = await Post.find()
+    const popularPosts = await Post.find(filter)
       .sort([["likeCount", -1]])
       .populate("authorId")
       .exec();
 
     res.status(200).send({
       data: popularPosts,
-      message: "인기순 포스트의 정보를 성공적으로 불러왔습니다.",
+      message: "포스트의 정보를 성공적으로 불러왔습니다.",
       status: "success",
     });
   } catch (error) {
     res.status(500).send({
       data: null,
-      message: "인기순 포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
+      message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
       status: "error",
     });
   }
@@ -168,16 +168,16 @@ export const createPost = async (
 
     doc("h1").remove();
 
-    // const q = `제목: ${title}, 내용: ${doc.text()}}`;
-    // const completion = await openai.chat.completions.create({
-    //   messages: [
-    //     {
-    //       role: "user",
-    //       content: `다음 내용에서 확실하게 틀린 부분이 있다면 false, [틀린 부분] 이런 형식으로 작성해서 알려주고 만약 내용이 어느정도 옳바르면 true만을 전달해줘. ${q}`,
-    //     },
-    //   ],
-    //   model: "gpt-4",
-    // });
+    const q = `제목: ${title}, 내용: ${doc.text()}}`;
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: `다음 내용에서 확실하게 틀린 부분이 있다면 false, [틀린 부분] 이런 형식으로 작성해서 알려주고 만약 내용이 어느정도 옳바르면 true만을 전달해줘. ${q}`,
+        },
+      ],
+      model: "gpt-4",
+    });
 
     const _id = await generateUID(Post, 10);
 
@@ -198,7 +198,7 @@ export const createPost = async (
     if (result && result._id) {
       res.status(200).send({
         data: {
-          // ai: completion.choices[0].message.content?.toLowerCase(),
+          ai: completion.choices[0].message.content?.toLowerCase(),
         },
         message: `새로운 포스트를 생성했습니다. id:${_id}`,
         status: "success",

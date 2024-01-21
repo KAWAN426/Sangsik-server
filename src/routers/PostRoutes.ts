@@ -8,16 +8,20 @@ const router = Router();
 router.get("/one/:id", PostController.getPostOne);
 
 //* desc 모든 포스트 최신순 정렬
-router.get("/latest", PostController.getLatestPosts);
+router.get("/latest", (req, res) =>
+  PostController.getLatestPosts(req, res, {})
+);
 
 //* desc 모든 포스트 중에서 좋아요 순 정렬
-router.get("/popular", PostController.getPopularPosts);
+router.get("/popular", (req, res) =>
+  PostController.getPopularPosts(req, res, {})
+);
 
 //* desc 특정 사용자가 북마크한 포스트를 인기순으로 정렬
 //* params: { userId: string }
 router.get("/user/bookmarks/:userId", (req, res) =>
   PostController.getPopularPosts(req, res, {
-    bookmarks: { $in: [req.params.userId] },
+    bookmarks: req.params.userId,
   })
 );
 
