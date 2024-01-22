@@ -45,7 +45,7 @@ app.use("/api/post", PostRoutes_1.default);
 app.use("/api/image", ImageRoutes_1.default);
 let v = "null";
 app.get("/", (req, res) => {
-    res.send(v);
+    res.send(`${v} ${process.env.ATLAS_URI}`);
 });
 app.listen(process.env.PORT || 8080, async () => {
     const result = await (0, config_1.default)();

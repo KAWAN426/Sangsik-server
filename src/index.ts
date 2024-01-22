@@ -48,7 +48,7 @@ app.use("/api/image", imageRoutes);
 let v = "null";
 
 app.get("/", (req, res) => {
-  res.send(v);
+  res.send(`${v} ${process.env.ATLAS_URI}`);
 });
 
 app.listen(process.env.PORT || 8080, async () => {
