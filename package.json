@@ -4,8 +4,8 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "build": "rimraf dist && tsc",
-    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "build": "rimraf dist && tsc && tsc-alias",
+    "start": "cross-env NODE_ENV=production nodemon -r tsconfig-paths/register dist/index.js",
     "dev": "cross-env NODE_ENV=development nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" -r tsconfig-paths/register src/index.ts",
     "deploy": "npm run build && zip -r main.zip package.json tsconfig.json dist games .env",
     "add-build": "git add dist",
@@ -65,6 +65,8 @@
     "mongoose": "^7.4.3",
     "multer": "^1.4.5-lts.1",
     "openai": "^4.24.7",
+    "tsc-alias": "^1.8.8",
+    "vercel": "^33.2.0",
     "zlib": "^1.0.5"
   }
 }

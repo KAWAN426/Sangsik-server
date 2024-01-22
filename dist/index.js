@@ -11,11 +11,11 @@ dotenv_1.default.config();
 if (process.env.NODE_ENV === "production") {
     require("module-alias/register");
 }
-// import cors from "@/middleware/cors";
-const config_1 = tslib_1.__importDefault(require("@/lib/mongodb/config"));
-const UserRoutes_1 = tslib_1.__importDefault(require("@/routers/UserRoutes"));
-const ImageRoutes_1 = tslib_1.__importDefault(require("@/routers/ImageRoutes"));
-const PostRoutes_1 = tslib_1.__importDefault(require("@/routers/PostRoutes"));
+// import cors from "./middleware/cors";
+const config_1 = tslib_1.__importDefault(require("./lib/mongodb/config"));
+const UserRoutes_1 = tslib_1.__importDefault(require("./routers/UserRoutes"));
+const ImageRoutes_1 = tslib_1.__importDefault(require("./routers/ImageRoutes"));
+const PostRoutes_1 = tslib_1.__importDefault(require("./routers/PostRoutes"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
