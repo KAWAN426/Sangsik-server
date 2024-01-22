@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "start": "nodemon src/index.ts",
+    "start": "node dist/index.js",
     "dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" -r tsconfig-paths/register src/index.ts",
     "deploy": "npm run build && zip -r main.zip package.json tsconfig.json dist games .env",
     "add-build": "git add dist",
