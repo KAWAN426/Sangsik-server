@@ -1,13 +1,16 @@
+// import "module-alias/register";
 import express from "express";
 import dotenv from "dotenv";
 import helmet from "helmet";
+dotenv.config();
+if (process.env.NODE_ENV === "production") {
+  require("module-alias/register");
+}
 import cors from "@/middleware/cors";
 import mongodbConfig from "@/lib/mongodb/config";
 import userRoutes from "@/routers/UserRoutes";
 import imageRoutes from "@/routers/ImageRoutes";
 import postRoutes from "@/routers/PostRoutes";
-
-dotenv.config();
 
 const app = express();
 app.use(express.json());
