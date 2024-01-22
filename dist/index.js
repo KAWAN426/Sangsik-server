@@ -43,11 +43,14 @@ app.use((0, helmet_1.default)());
 app.use("/api/user", UserRoutes_1.default);
 app.use("/api/post", PostRoutes_1.default);
 app.use("/api/image", ImageRoutes_1.default);
+let v = "null";
 app.get("/", (req, res) => {
-    res.send("Ok");
+    res.send(v);
 });
 app.listen(process.env.PORT || 8080, async () => {
-    await (0, config_1.default)();
+    const result = await (0, config_1.default)();
+    if (result)
+        v = "connected";
     console.log("Server on http://localhost:8080/");
 });
 //# sourceMappingURL=index.js.map

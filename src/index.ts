@@ -45,11 +45,14 @@ app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
 app.use("/api/image", imageRoutes);
 
+let v = "null";
+
 app.get("/", (req, res) => {
-  res.send("Ok");
+  res.send(v);
 });
 
 app.listen(process.env.PORT || 8080, async () => {
-  await mongodbConfig();
+  const result = await mongodbConfig();
+  if (result) v = "connected";
   console.log("Server on http://localhost:8080/");
 });
