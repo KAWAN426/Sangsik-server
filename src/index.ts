@@ -37,6 +37,7 @@ const corsOptions = {
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
+
 app.use(cors(corsOptions));
 app.use(helmet());
 
