@@ -14,8 +14,6 @@ const userSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      unique: true,
-      required: true
     },
     name: {
       type: String,
@@ -40,6 +38,8 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.index({ _id: "text" });
 
 const User = mongoose.model<IUser>("User", userSchema);
 export default User;

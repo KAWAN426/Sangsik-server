@@ -20,8 +20,6 @@ const postSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      unique: true,
-      required: true,
     },
     title: {
       type: String,
@@ -73,6 +71,8 @@ postSchema.methods.toggleBookmark = function (userId: string) {
   }
   this.bookmarkCount = this.bookmarks.length;
 };
+
+postSchema.index({ _id: "text", title: "text" });
 
 const Post = mongoose.model<IPost>("Post", postSchema);
 
