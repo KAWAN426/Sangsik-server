@@ -11,10 +11,11 @@ if (process.env.NODE_ENV === "production") {
     require("module-alias/register");
 }
 // import cors from "./middleware/cors";
-const config_1 = tslib_1.__importDefault(require("./lib/mongodb/config"));
+// import mongodbConfig from "./lib/mongodb/config";
 const UserRoutes_1 = tslib_1.__importDefault(require("./routers/UserRoutes"));
 const ImageRoutes_1 = tslib_1.__importDefault(require("./routers/ImageRoutes"));
 const PostRoutes_1 = tslib_1.__importDefault(require("./routers/PostRoutes"));
+const mongoose_1 = tslib_1.__importDefault(require("mongoose"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
@@ -43,14 +44,25 @@ app.use((0, helmet_1.default)());
 app.use("/api/user", UserRoutes_1.default);
 app.use("/api/post", PostRoutes_1.default);
 app.use("/api/image", ImageRoutes_1.default);
-let v = "null";
+const v = { value: "null" };
+const connectDB = async () => {
+    try {
+        const conn = await mongoose_1.default.connect(process.env.ATLAS_URI || "", {
+            dbName: "sangsiksun",
+        });
+        v.value = "connected";
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+    }
+    catch (err) {
+        console.error(err);
+        process.exit(1); // 실패 시 애플리케이션 종료
+    }
+};
+connectDB();
 app.get("/", (req, res) => {
-    res.send(`${v} ${process.env.ATLAS_URI}`);
+    res.send(`${v.value} ${process.env.ATLAS_URI}`);
 });
 app.listen(process.env.PORT || 8080, async () => {
-    const result = await (0, config_1.default)();
-    if (result)
-        v = "connected";
     console.log("Server on http://localhost:8080/");
 });
 //# sourceMappingURL=index.js.map

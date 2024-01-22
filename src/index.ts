@@ -8,10 +8,11 @@ if (process.env.NODE_ENV === "production") {
   require("module-alias/register");
 }
 // import cors from "@/middleware/cors";
-import mongodbConfig from "@/lib/mongodb/config";
+// import mongodbConfig from "@/lib/mongodb/config";
 import userRoutes from "@/routers/UserRoutes";
 import imageRoutes from "@/routers/ImageRoutes";
 import postRoutes from "@/routers/PostRoutes";
+import mongoose from "mongoose";
 
 const app = express();
 app.use(express.json());
@@ -45,14 +46,25 @@ app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
 app.use("/api/image", imageRoutes);
 
-let v = "null";
+const v = { value: "null" };
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.ATLAS_URI || "", {
+      dbName: "sangsiksun",
+    });
+    v.value = "connected";
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (err) {
+    console.error(err);
+    process.exit(1); // 실패 시 애플리케이션 종료
+  }
+};
+connectDB();
 
 app.get("/", (req, res) => {
-  res.send(`${v} ${process.env.ATLAS_URI}`);
+  res.send(`${v.value} ${process.env.ATLAS_URI}`);
 });
 
 app.listen(process.env.PORT || 8080, async () => {
-  const result = await mongodbConfig();
-  if (result) v = "connected";
   console.log("Server on http://localhost:8080/");
 });
