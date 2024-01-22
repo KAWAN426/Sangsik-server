@@ -11,6 +11,9 @@
     "add-build": "git add dist",
     "ts.check": "tsc --project tsconfig.json"
   },
+  "_moduleAliases": {
+    "@": "dist/"
+  },
   "pre-commit": [
     "ts.check",
     "build",
@@ -47,6 +50,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@img/sharp-win32-x64": "^0.33.2",
     "aws-sdk": "^2.1533.0",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
@@ -60,6 +64,7 @@
     "jsonwebtoken": "^9.0.1",
     "lodash": "^4.17.21",
     "memory-cache": "^0.2.0",
+    "module-alias": "^2.2.3",
     "mongoose": "^7.4.3",
     "multer": "^1.4.5-lts.1",
     "openai": "^4.24.7",
