@@ -17,28 +17,28 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-const whitelist = [
-  "http://localhost:3000",
-  ...(process.env.ALLOW_DOMAIN?.split(", ") || []),
-];
-const corsOptions = {
-  origin: function (
-    origin: string | undefined,
-    callback: (err: Error | null, allow?: boolean) => void
-  ) {
-    if (!origin || whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-};
+// const whitelist = [
+//   "http://localhost:3000",
+//   ...(process.env.ALLOW_DOMAIN?.split(", ") || []),
+// ];
+// const corsOptions = {
+//   origin: function (
+//     origin: string | undefined,
+//     callback: (err: Error | null, allow?: boolean) => void
+//   ) {
+//     if (!origin || whitelist.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//   credentials: true,
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+// };
 
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(helmet());
 
 app.use("/api/user", userRoutes);

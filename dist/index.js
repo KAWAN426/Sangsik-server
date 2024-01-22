@@ -1,5 +1,4 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 // import "module-alias/register";
@@ -19,25 +18,27 @@ const PostRoutes_1 = tslib_1.__importDefault(require("./routers/PostRoutes"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
-const whitelist = [
-    "http://localhost:3000",
-    ...(((_a = process.env.ALLOW_DOMAIN) === null || _a === void 0 ? void 0 : _a.split(", ")) || []),
-];
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin || whitelist.indexOf(origin) !== -1) {
-            callback(null, true);
-        }
-        else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-};
-app.use((0, cors_1.default)(corsOptions));
+// const whitelist = [
+//   "http://localhost:3000",
+//   ...(process.env.ALLOW_DOMAIN?.split(", ") || []),
+// ];
+// const corsOptions = {
+//   origin: function (
+//     origin: string | undefined,
+//     callback: (err: Error | null, allow?: boolean) => void
+//   ) {
+//     if (!origin || whitelist.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//   credentials: true,
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+// };
+app.use((0, cors_1.default)());
 app.use((0, helmet_1.default)());
 app.use("/api/user", UserRoutes_1.default);
 app.use("/api/post", PostRoutes_1.default);
