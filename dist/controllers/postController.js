@@ -211,28 +211,30 @@ const deletePost = async (req, res) => {
 exports.deletePost = deletePost;
 const getPostList = async (req, res, filter) => {
     try {
-        // const keyword = req.query.q
-        //   ? req.query.q
-        //       .split(/\s+/)
-        //       .map((word: string) => `(${word})`)
-        //       .join("|")
-        //   : undefined;
-        // const filterOb = typeof filter === "object" ? filter : {};
-        // const search = keyword
-        //   ? {
-        //       $or: [{ title: { $regex: keyword, $options: "i" } }],
-        //     }
-        //   : filterOb;
-        // const orderQuery = req.query.order;
-        // const order: [string, SortOrder][] = [];
-        // if (orderQuery === "latest") order[0] = ["createdAt", -1];
-        // else if (orderQuery === "popular") order[0] = ["likeCount", -1];
-        // const posts = await Post.find(search)
-        //   .sort(order)
-        //   .populate("authorId")
-        //   .exec();
+        const keyword = req.query.q
+            ? req.query.q
+                .split(/\s+/)
+                .map((word) => `(${word})`)
+                .join("|")
+            : undefined;
+        const filterOb = typeof filter === "object" ? filter : {};
+        const search = keyword
+            ? {
+                $or: [{ title: { $regex: keyword, $options: "i" } }],
+            }
+            : filterOb;
+        const orderQuery = req.query.order;
+        const order = [];
+        if (orderQuery === "latest")
+            order[0] = ["createdAt", -1];
+        else if (orderQuery === "popular")
+            order[0] = ["likeCount", -1];
+        const posts = await Post_1.default.find(search)
+            .sort(order)
+            .populate("authorId")
+            .exec();
         res.status(200).send({
-            data: "OK",
+            data: posts,
             message: "포스트의 정보를 성공적으로 불러왔습니다.1",
             status: "success",
         });
