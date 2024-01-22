@@ -20,6 +20,10 @@ app.use("/api/user", userRoutes);
 app.use("/api/post", postRoutes);
 app.use("/api/image", imageRoutes);
 
+app.get("/", (req, res) => {
+  res.send("Ok");
+});
+
 app.listen(process.env.PORT || 8080, async () => {
   await mongodbConfig();
   console.log("Server on http://localhost:8080/");

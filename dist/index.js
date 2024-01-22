@@ -18,6 +18,9 @@ app.use((0, helmet_1.default)());
 app.use("/api/user", UserRoutes_1.default);
 app.use("/api/post", PostRoutes_1.default);
 app.use("/api/image", ImageRoutes_1.default);
+app.get("/", (req, res) => {
+    res.send("Ok");
+});
 app.listen(process.env.PORT || 8080, async () => {
     await (0, config_1.default)();
     console.log("Server on http://localhost:8080/");
