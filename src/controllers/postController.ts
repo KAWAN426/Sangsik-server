@@ -5,6 +5,7 @@ import { TypedRequest, TypedResponse } from "@/types/express";
 import generateUID from "@/utils/uniqueIdGenerator";
 import { compressString } from "@/utils/zipString";
 import cheerio from "cheerio";
+import { SortOrder } from "mongoose";
 
 export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
   try {
@@ -22,57 +23,6 @@ export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
       status: "success",
     });
   } catch (err) {
-    res.status(500).send({
-      data: null,
-      message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
-      status: "error",
-    });
-  }
-};
-
-export const getLatestPosts = async (
-  req: TypedRequest,
-  res: TypedResponse,
-  filter: Object = {}
-) => {
-  try {
-    const latestPosts = await Post.find(filter)
-      .sort([["createdAt", -1]])
-      .populate("authorId")
-      .exec();
-
-    res.status(200).send({
-      data: latestPosts,
-      message: "포스트의 정보를 성공적으로 불러왔습니다.1",
-      status: "success",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      data: null,
-      message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
-      status: "error",
-    });
-  }
-};
-
-export const getPopularPosts = async (
-  req: TypedRequest,
-  res: TypedResponse,
-  filter: Object = {}
-) => {
-  try {
-    const popularPosts = await Post.find(filter)
-      .sort([["likeCount", -1]])
-      .populate("authorId")
-      .exec();
-
-    res.status(200).send({
-      data: popularPosts,
-      message: "포스트의 정보를 성공적으로 불러왔습니다.",
-      status: "success",
-    });
-  } catch (error) {
     res.status(500).send({
       data: null,
       message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
@@ -275,6 +225,48 @@ export const deletePost = async (req: TypedRequest, res: TypedResponse) => {
     res.status(500).send({
       data: null,
       message: "포스트를 제거하는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const getPostList = async (
+  req: TypedRequest<{ q?: string; order?: "latest" | "popular" }>,
+  res: TypedResponse,
+  filter?: Object
+) => {
+  try {
+    const keyword = req.query.q;
+    const filterOb = typeof filter === "object" ? filter : {};
+    const search = keyword
+      ? {
+          $or: [
+            { title: { $regex: keyword, $options: "i" } },
+            { content: { $regex: keyword, $options: "i" } },
+          ],
+        }
+      : filterOb;
+    const orderQuery = req.query.order;
+    const order: [string, SortOrder][] = [];
+
+    if (orderQuery === "latest") order[0] = ["createdAt", -1];
+    else if (orderQuery === "popular") order[0] = ["likeCount", -1];
+
+    const posts = await Post.find(search)
+      .sort(order)
+      .populate("authorId")
+      .exec();
+
+    res.status(200).send({
+      data: posts,
+      message: "포스트의 정보를 성공적으로 불러왔습니다.1",
+      status: "success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      data: null,
+      message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
       status: "error",
     });
   }

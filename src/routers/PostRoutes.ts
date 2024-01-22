@@ -3,32 +3,26 @@ import * as PostController from "@/controllers/postController";
 
 const router = Router();
 
+//* desc 포스트를 검색 및 인기, 최신 순으로 정렬
+//* query: { q?: string, order?: "latest" | "popular" }
+router.get("/", PostController.getPostList);
+
 //* desc 특정 id의 포스트 데이터 얻어옴
 //* params: { id: string }
-router.get("/one/:id", PostController.getPostOne);
+router.get("/:id", PostController.getPostOne);
 
-//* desc 모든 포스트 최신순 정렬
-router.get("/latest", (req, res) =>
-  PostController.getLatestPosts(req, res, {})
-);
-
-//* desc 모든 포스트 중에서 좋아요 순 정렬
-router.get("/popular", (req, res) =>
-  PostController.getPopularPosts(req, res, {})
-);
-
-//* desc 특정 사용자가 북마크한 포스트를 인기순으로 정렬
-//* params: { userId: string }
+//* desc 특정 사용자가 북마크한 포스트를 정렬
+//* params: { userId: string }, query: { q?: string, order?: "latest" | "popular" }
 router.get("/user/bookmarks/:userId", (req, res) =>
-  PostController.getPopularPosts(req, res, {
+  PostController.getPostList(req, res, {
     bookmarks: req.params.userId,
   })
 );
 
-//* desc 특정 사용자의 포스트를 최신순으로 정렬
-//* params: { postId: string, userId: string }
+//* desc 특정 사용자의 포스트를 정렬
+//* params: { postId: string, userId: string }, query: { q?: string, order?: "latest" | "popular" }
 router.get("/user/:userId", (req, res) =>
-  PostController.getLatestPosts(req, res, { authorId: req.params.userId })
+  PostController.getPostList(req, res, { authorId: req.params.userId })
 );
 
 //* desc 포스트의 좋아요 수정
