@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const express_1 = require("express");
-const PostController = tslib_1.__importStar(require("@/controllers/postController"));
+const PostController = tslib_1.__importStar(require("../controllers/postController"));
 const router = (0, express_1.Router)();
 //* desc 포스트를 검색 및 인기, 최신 순으로 정렬
 //* query: { q?: string, order?: "latest" | "popular" }

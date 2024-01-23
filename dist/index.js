@@ -8,10 +8,10 @@ dotenv_1.default.config();
 if (process.env.NODE_ENV === "production") {
     require("module-alias/register");
 }
-const cors_1 = tslib_1.__importDefault(require("@/middleware/cors"));
-const UserRoutes_1 = tslib_1.__importDefault(require("@/routers/UserRoutes"));
-const ImageRoutes_1 = tslib_1.__importDefault(require("@/routers/ImageRoutes"));
-const PostRoutes_1 = tslib_1.__importDefault(require("@/routers/PostRoutes"));
+const cors_1 = tslib_1.__importDefault(require("./middleware/cors"));
+const UserRoutes_1 = tslib_1.__importDefault(require("./routers/UserRoutes"));
+const ImageRoutes_1 = tslib_1.__importDefault(require("./routers/ImageRoutes"));
+const PostRoutes_1 = tslib_1.__importDefault(require("./routers/PostRoutes"));
 const connect_1 = tslib_1.__importDefault(require("./lib/mongodb/connect"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
