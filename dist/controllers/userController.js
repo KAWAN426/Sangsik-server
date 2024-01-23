@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUser = exports.getUser = void 0;
 const tslib_1 = require("tslib");
-const User_1 = tslib_1.__importDefault(require("../models/User"));
+const User_1 = tslib_1.__importDefault(require("@/models/User"));
 const getUser = async (req, res) => {
     try {
         const user = await User_1.default.findById(req.params.id);

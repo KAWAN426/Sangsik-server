@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadImage = exports.upload = void 0;
 const tslib_1 = require("tslib");
 const multer_1 = tslib_1.__importDefault(require("multer"));
-const s3_1 = tslib_1.__importDefault(require("../lib/s3"));
+const s3_1 = tslib_1.__importDefault(require("@/lib/s3"));
 const jimp_1 = tslib_1.__importDefault(require("jimp"));
 const storage = multer_1.default.memoryStorage();
 exports.upload = (0, multer_1.default)({ storage });

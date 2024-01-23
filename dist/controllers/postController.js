@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPostList = exports.deletePost = exports.updatePost = exports.createPost = exports.togglePostBookmark = exports.togglePostLike = exports.getPostOne = void 0;
 const tslib_1 = require("tslib");
-const openai_1 = tslib_1.__importDefault(require("../lib/openai"));
-const Post_1 = tslib_1.__importDefault(require("../models/Post"));
-const User_1 = tslib_1.__importDefault(require("../models/User"));
-const uniqueIdGenerator_1 = tslib_1.__importDefault(require("../utils/uniqueIdGenerator"));
-const zipString_1 = require("../utils/zipString");
+const openai_1 = tslib_1.__importDefault(require("@/lib/openai"));
+const Post_1 = tslib_1.__importDefault(require("@/models/Post"));
+const User_1 = tslib_1.__importDefault(require("@/models/User"));
+const uniqueIdGenerator_1 = tslib_1.__importDefault(require("@/utils/uniqueIdGenerator"));
+const zipString_1 = require("@/utils/zipString");
 const cheerio_1 = tslib_1.__importDefault(require("cheerio"));
 const getPostOne = async (req, res) => {
     try {
