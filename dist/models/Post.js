@@ -54,7 +54,7 @@ postSchema.methods.toggleBookmark = function (userId) {
     }
     this.bookmarkCount = this.bookmarks.length;
 };
-postSchema.index({ _id: "text", title: "text" });
+postSchema.index({ title: "text" });
 const Post = mongoose_1.default.model("Post", postSchema);
 exports.default = Post;
 //# sourceMappingURL=Post.js.map

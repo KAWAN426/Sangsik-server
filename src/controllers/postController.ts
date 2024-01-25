@@ -1,5 +1,6 @@
 import openai from "@/lib/openai";
 import Post from "@/models/Post";
+import Report from "@/models/Report";
 import User from "@/models/User";
 import { TypedRequest, TypedResponse } from "@/types/express";
 import generateUID from "@/utils/uniqueIdGenerator";
@@ -257,6 +258,7 @@ export const getPostList = async (
     const posts = await Post.find(search)
       .sort(order)
       .populate("authorId")
+      .select("-content")
       .exec();
 
     res.status(200).send({
@@ -269,6 +271,47 @@ export const getPostList = async (
     res.status(500).send({
       data: null,
       message: "포스트의 정보를 불러오는 과정에서 오류가 발생했습니다.",
+      status: "error",
+    });
+  }
+};
+
+export const reportPost = async (
+  req: TypedRequest<{
+    postId: string;
+    userId: string;
+    reportType?: string;
+    description?: string;
+  }>,
+  res: TypedResponse
+) => {
+  try {
+    const { postId, userId } = req.query;
+    const newReport = new Report({
+      postId,
+      userId,
+    });
+
+    const result = await newReport.save();
+
+    if (result && result._id) {
+      res.status(200).send({
+        data: null,
+        message: `새로운 리포트를 생성했습니다. id:${result._id}`,
+        status: "success",
+      });
+    } else {
+      res.status(400).send({
+        data: null,
+        message: `새로운 리포트를 생성하는데 실패했습니다.`,
+        status: "success",
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      data: null,
+      message: "새로운 리포트를 생성하는 과정에서 오류가 발생했습니다.",
       status: "error",
     });
   }

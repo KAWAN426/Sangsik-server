@@ -27,7 +27,6 @@ const userSchema = new mongoose_1.default.Schema({
         required: false,
     },
 }, { timestamps: true });
-userSchema.index({ _id: "text" });
 const User = mongoose_1.default.model("User", userSchema);
 exports.default = User;
 //# sourceMappingURL=User.js.map

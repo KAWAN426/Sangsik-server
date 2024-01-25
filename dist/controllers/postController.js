@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPostList = exports.deletePost = exports.updatePost = exports.createPost = exports.togglePostBookmark = exports.togglePostLike = exports.getPostOne = void 0;
+exports.reportPost = exports.getPostList = exports.deletePost = exports.updatePost = exports.createPost = exports.togglePostBookmark = exports.togglePostLike = exports.getPostOne = void 0;
 const tslib_1 = require("tslib");
 const openai_1 = tslib_1.__importDefault(require("../lib/openai"));
 const Post_1 = tslib_1.__importDefault(require("../models/Post"));
+const Report_1 = tslib_1.__importDefault(require("../models/Report"));
 const User_1 = tslib_1.__importDefault(require("../models/User"));
 const uniqueIdGenerator_1 = tslib_1.__importDefault(require("../utils/uniqueIdGenerator"));
 const zipString_1 = require("../utils/zipString");
@@ -232,6 +233,7 @@ const getPostList = async (req, res, filter) => {
         const posts = await Post_1.default.find(search)
             .sort(order)
             .populate("authorId")
+            .select("-content")
             .exec();
         res.status(200).send({
             data: posts,
@@ -249,4 +251,37 @@ const getPostList = async (req, res, filter) => {
     }
 };
 exports.getPostList = getPostList;
+const reportPost = async (req, res) => {
+    try {
+        const { postId, userId } = req.query;
+        const newReport = new Report_1.default({
+            postId,
+            userId,
+        });
+        const result = await newReport.save();
+        if (result && result._id) {
+            res.status(200).send({
+                data: null,
+                message: `새로운 리포트를 생성했습니다. id:${result._id}`,
+                status: "success",
+            });
+        }
+        else {
+            res.status(400).send({
+                data: null,
+                message: `새로운 리포트를 생성하는데 실패했습니다.`,
+                status: "success",
+            });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).send({
+            data: null,
+            message: "새로운 리포트를 생성하는 과정에서 오류가 발생했습니다.",
+            status: "error",
+        });
+    }
+};
+exports.reportPost = reportPost;
 //# sourceMappingURL=postController.js.map

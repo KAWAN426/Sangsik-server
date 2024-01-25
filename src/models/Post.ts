@@ -72,7 +72,7 @@ postSchema.methods.toggleBookmark = function (userId: string) {
   this.bookmarkCount = this.bookmarks.length;
 };
 
-postSchema.index({ _id: "text", title: "text" });
+postSchema.index({ title: "text" });
 
 const Post = mongoose.model<IPost>("Post", postSchema);
 
