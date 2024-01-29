@@ -8,30 +8,8 @@ const storage = multer.memoryStorage();
 export const upload = multer({ storage });
 
 const resizeAndUploadImage = async (file: Express.Multer.File) => {
-  const maxWidth = 1200;
-  const maxHeight = 675;
-  // const resizedImage = await sharp(file.buffer)
-  //   .metadata()
-  //   .then((metadata) => {
-  //     const { width, height } = metadata;
-
-  //     if (width && height && width <= maxWidth && height <= maxHeight)
-  //       return sharp(file.buffer)
-  //         .toFormat("jpeg")
-  //         .jpeg({ quality: 80 })
-  //         .toBuffer();
-
-  //     return sharp(file.buffer)
-  //       .resize({
-  //         width: maxWidth,
-  //         height: maxHeight,
-  //         fit: sharp.fit.inside,
-  //         withoutEnlargement: true,
-  //       })
-  //       .toFormat("jpeg")
-  //       .jpeg({ quality: 80 })
-  //       .toBuffer();
-  //   });
+  const maxWidth = 900;
+  const maxHeight = 900;
 
   const image = await Jimp.read(file.buffer);
   const { width, height } = image.bitmap;

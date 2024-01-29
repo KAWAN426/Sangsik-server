@@ -270,7 +270,7 @@ const reportPost = async (req, res) => {
             res.status(400).send({
                 data: null,
                 message: `새로운 리포트를 생성하는데 실패했습니다.`,
-                status: "success",
+                status: "error",
             });
         }
     }
