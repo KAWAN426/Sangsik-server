@@ -3,7 +3,8 @@ import mongoose, { Document } from "mongoose";
 interface IPost extends Document {
   _id: string;
   title: string;
-  content: string;
+  description: string;
+  contents: string;
   previewImage?: string;
   authorId: string;
   likes: string[];
@@ -23,15 +24,16 @@ const postSchema = new mongoose.Schema(
     },
     title: {
       type: String,
-      required: true,
     },
-    content: {
+    description: {
+      type: String,
+    },
+    contents: {
       type: String,
       required: true,
     },
     previewImage: {
       type: String,
-      required: false,
     },
     authorId: {
       type: String,
@@ -42,10 +44,12 @@ const postSchema = new mongoose.Schema(
     bookmarks: [String],
     likeCount: {
       type: Number,
-      required: true,
     },
     bookmarkCount: {
       type: Number,
+    },
+    aiTestResult: {
+      type: Boolean,
       required: true,
     },
   },
@@ -72,7 +76,7 @@ postSchema.methods.toggleBookmark = function (userId: string) {
   this.bookmarkCount = this.bookmarks.length;
 };
 
-postSchema.index({ title: "text" });
+postSchema.index({ title: "text", description: "text" });
 
 const Post = mongoose.model<IPost>("Post", postSchema);
 

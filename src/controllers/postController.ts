@@ -1,11 +1,12 @@
 import openai from "@/lib/openai";
+import verifyContents from "@/lib/openai/verifyContents";
 import Post from "@/models/Post";
 import Report from "@/models/Report";
 import User from "@/models/User";
 import { TypedRequest, TypedResponse } from "@/types/express";
 import generateUID from "@/utils/uniqueIdGenerator";
 import { compressString } from "@/utils/zipString";
-import cheerio from "cheerio";
+// import cheerio from "cheerio";
 import { SortOrder } from "mongoose";
 
 export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
@@ -108,59 +109,62 @@ export const togglePostBookmark = async (
 export const createPost = async (
   req: TypedRequest<
     {},
-    { title: string; content: string; previewImage?: string; authorId: string }
+    {
+      title: string;
+      contents: string;
+      description: string;
+      detail: string;
+      previewImage?: string;
+      authorId: string;
+    }
   >,
   res: TypedResponse
 ) => {
   try {
-    const { title, content, previewImage, authorId } = req.body;
+    const { title, contents, detail, previewImage, authorId, description } =
+      req.body;
 
-    const doc = cheerio.load(content);
+    const aiResult = await verifyContents(title, detail);
 
-    doc("h1").remove();
+    if (aiResult?.toLowerCase() === "true") {
+      const _id = await generateUID(Post, 10);
 
-    const q = `제목: ${title}, 내용: ${doc.text()}}`;
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: `다음 내용에서 확실하게 틀린 부분이 있다면 false, [틀린 부분] 이런 형식으로 작성해서 알려주고 만약 내용이 어느정도 옳바르면 true만을 전달해줘. ${q}`,
-        },
-      ],
-      model: "gpt-4",
-    });
-
-    const _id = await generateUID(Post, 10);
-
-    const newPost = new Post({
-      _id,
-      title,
-      content: compressString(content),
-      previewImage: previewImage ?? null,
-      authorId,
-      likes: [],
-      bookmarks: [],
-      likeCount: 0,
-      bookmarkCount: 0,
-    });
-
-    const result = await newPost.save();
-
-    if (result && result._id) {
-      res.status(200).send({
-        data: {
-          ai: completion.choices[0].message.content?.toLowerCase(),
-        },
-        message: `새로운 포스트를 생성했습니다. id:${_id}`,
-        status: "success",
+      const newPost = new Post({
+        _id,
+        title,
+        description,
+        contents: compressString(contents),
+        previewImage: previewImage ?? null,
+        authorId,
+        likes: [],
+        bookmarks: [],
+        likeCount: 0,
+        bookmarkCount: 0,
       });
-    } else {
-      res.status(400).send({
+
+      const result = await newPost.save();
+
+      if (result && result._id)
+        return res.status(200).send({
+          data: null,
+          message: `새로운 포스트를 생성했습니다. id:${_id}`,
+          status: "success",
+        });
+
+      return res.status(400).send({
         data: null,
         message: `새로운 포스트를 생성하는데 실패했습니다.`,
         status: "success",
       });
     }
+
+    res.status(200).send({
+      data: {
+        aiResult,
+      },
+      message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+      status: "success",
+    });
   } catch (err) {
     console.log(err);
     res.status(500).send({
@@ -174,29 +178,45 @@ export const createPost = async (
 export const updatePost = async (
   req: TypedRequest<
     {},
-    { title?: string; content?: string; previewImage?: string }
+    {
+      title: string;
+      contents: string;
+      previewImage?: string;
+      detail: string;
+      description: string;
+    }
   >,
   res: TypedResponse
 ) => {
   try {
-    const { title, content, previewImage } = req.body;
-    const result = await Post.updateOne(
-      { _id: req.params.id },
-      { $set: { title, content, previewImage } }
-    );
-    if (result.modifiedCount === 1) {
-      res.status(200).send({
-        data: null,
-        message: `성공적으로 포스트를 수정했습니다.`,
-        status: "success",
-      });
-    } else {
-      res.status(400).send({
+    const { title, contents, previewImage, detail, description } = req.body;
+
+    const aiResult = await verifyContents(title, detail);
+    if (aiResult?.toLowerCase() === "true") {
+      const result = await Post.updateOne(
+        { _id: req.params.id },
+        { $set: { title, contents, previewImage, description } }
+      );
+      if (result.modifiedCount === 1)
+        return res.status(200).send({
+          data: null,
+          message: `성공적으로 포스트를 수정했습니다.`,
+          status: "success",
+        });
+      return res.status(400).send({
         data: null,
         message: `포스트를 수정하는데 실패했습니다.`,
         status: "success",
       });
     }
+
+    res.status(200).send({
+      data: {
+        aiResult,
+      },
+      message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+      status: "success",
+    });
   } catch (err) {
     res.status(500).send({
       data: null,
@@ -246,7 +266,10 @@ export const getPostList = async (
     const filterOb = typeof filter === "object" ? filter : {};
     const search = keyword
       ? {
-          $or: [{ title: { $regex: keyword, $options: "i" } }],
+          $or: [
+            { title: { $regex: keyword, $options: "i" } },
+            { description: { $regex: keyword, $options: "i" } },
+          ],
         }
       : filterOb;
     const orderQuery = req.query.order;

@@ -25,10 +25,10 @@ router.put("/toggle/like/:postId/:userId", PostController.togglePostLike);
 //* params: { postId: string, userId: string }
 router.put("/toggle/bookmark/:postId/:userId", PostController.togglePostBookmark);
 //* desc: 새 포스트 생성
-//* body: { title: string, content: string, previewImage?: string, authorId: string }
+//* body: { title: string, contents: string, description: string, previewImage?: string, detail: string, authorId: string }
 router.post("/", PostController.createPost);
 //* desc: 포스트 내용 업데이트
-//* body: { title: string, content: string, previewImage?: string }, params: { id: string }
+//* body: { title: string, contents: string, description: string, previewImage?: string, detail: string }, params: { id: string }
 router.put("/update/:id", PostController.updatePost);
 //* desc: 포스트 제거
 //* params: { id: string }

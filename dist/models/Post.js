@@ -8,15 +8,16 @@ const postSchema = new mongoose_1.default.Schema({
     },
     title: {
         type: String,
-        required: true,
     },
-    content: {
+    description: {
+        type: String,
+    },
+    contents: {
         type: String,
         required: true,
     },
     previewImage: {
         type: String,
-        required: false,
     },
     authorId: {
         type: String,
@@ -27,10 +28,12 @@ const postSchema = new mongoose_1.default.Schema({
     bookmarks: [String],
     likeCount: {
         type: Number,
-        required: true,
     },
     bookmarkCount: {
         type: Number,
+    },
+    aiTestResult: {
+        type: Boolean,
         required: true,
     },
 }, { timestamps: true });
@@ -54,7 +57,7 @@ postSchema.methods.toggleBookmark = function (userId) {
     }
     this.bookmarkCount = this.bookmarks.length;
 };
-postSchema.index({ title: "text" });
+postSchema.index({ title: "text", description: "text" });
 const Post = mongoose_1.default.model("Post", postSchema);
 exports.default = Post;
 //# sourceMappingURL=Post.js.map

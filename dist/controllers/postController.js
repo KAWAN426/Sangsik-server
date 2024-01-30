@@ -2,13 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reportPost = exports.getPostList = exports.deletePost = exports.updatePost = exports.createPost = exports.togglePostBookmark = exports.togglePostLike = exports.getPostOne = void 0;
 const tslib_1 = require("tslib");
-const openai_1 = tslib_1.__importDefault(require("../lib/openai"));
+const verifyContents_1 = tslib_1.__importDefault(require("../lib/openai/verifyContents"));
 const Post_1 = tslib_1.__importDefault(require("../models/Post"));
 const Report_1 = tslib_1.__importDefault(require("../models/Report"));
 const User_1 = tslib_1.__importDefault(require("../models/User"));
 const uniqueIdGenerator_1 = tslib_1.__importDefault(require("../utils/uniqueIdGenerator"));
 const zipString_1 = require("../utils/zipString");
-const cheerio_1 = tslib_1.__importDefault(require("cheerio"));
 const getPostOne = async (req, res) => {
     try {
         const post = await Post_1.default.findById(req.params.id).populate("authorId").exec();
@@ -100,50 +99,43 @@ const togglePostBookmark = async (req, res) => {
 };
 exports.togglePostBookmark = togglePostBookmark;
 const createPost = async (req, res) => {
-    var _a;
     try {
-        const { title, content, previewImage, authorId } = req.body;
-        const doc = cheerio_1.default.load(content);
-        doc("h1").remove();
-        const q = `제목: ${title}, 내용: ${doc.text()}}`;
-        const completion = await openai_1.default.chat.completions.create({
-            messages: [
-                {
-                    role: "user",
-                    content: `다음 내용에서 확실하게 틀린 부분이 있다면 false, [틀린 부분] 이런 형식으로 작성해서 알려주고 만약 내용이 어느정도 옳바르면 true만을 전달해줘. ${q}`,
-                },
-            ],
-            model: "gpt-4",
-        });
-        const _id = await (0, uniqueIdGenerator_1.default)(Post_1.default, 10);
-        const newPost = new Post_1.default({
-            _id,
-            title,
-            content: (0, zipString_1.compressString)(content),
-            previewImage: previewImage !== null && previewImage !== void 0 ? previewImage : null,
-            authorId,
-            likes: [],
-            bookmarks: [],
-            likeCount: 0,
-            bookmarkCount: 0,
-        });
-        const result = await newPost.save();
-        if (result && result._id) {
-            res.status(200).send({
-                data: {
-                    ai: (_a = completion.choices[0].message.content) === null || _a === void 0 ? void 0 : _a.toLowerCase(),
-                },
-                message: `새로운 포스트를 생성했습니다. id:${_id}`,
-                status: "success",
+        const { title, contents, detail, previewImage, authorId, description } = req.body;
+        const aiResult = await (0, verifyContents_1.default)(title, detail);
+        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true") {
+            const _id = await (0, uniqueIdGenerator_1.default)(Post_1.default, 10);
+            const newPost = new Post_1.default({
+                _id,
+                title,
+                description,
+                contents: (0, zipString_1.compressString)(contents),
+                previewImage: previewImage !== null && previewImage !== void 0 ? previewImage : null,
+                authorId,
+                likes: [],
+                bookmarks: [],
+                likeCount: 0,
+                bookmarkCount: 0,
             });
-        }
-        else {
-            res.status(400).send({
+            const result = await newPost.save();
+            if (result && result._id)
+                return res.status(200).send({
+                    data: null,
+                    message: `새로운 포스트를 생성했습니다. id:${_id}`,
+                    status: "success",
+                });
+            return res.status(400).send({
                 data: null,
                 message: `새로운 포스트를 생성하는데 실패했습니다.`,
                 status: "success",
             });
         }
+        res.status(200).send({
+            data: {
+                aiResult,
+            },
+            message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+            status: "success",
+        });
     }
     catch (err) {
         console.log(err);
@@ -157,22 +149,29 @@ const createPost = async (req, res) => {
 exports.createPost = createPost;
 const updatePost = async (req, res) => {
     try {
-        const { title, content, previewImage } = req.body;
-        const result = await Post_1.default.updateOne({ _id: req.params.id }, { $set: { title, content, previewImage } });
-        if (result.modifiedCount === 1) {
-            res.status(200).send({
-                data: null,
-                message: `성공적으로 포스트를 수정했습니다.`,
-                status: "success",
-            });
-        }
-        else {
-            res.status(400).send({
+        const { title, contents, previewImage, detail, description } = req.body;
+        const aiResult = await (0, verifyContents_1.default)(title, detail);
+        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true") {
+            const result = await Post_1.default.updateOne({ _id: req.params.id }, { $set: { title, contents, previewImage, description } });
+            if (result.modifiedCount === 1)
+                return res.status(200).send({
+                    data: null,
+                    message: `성공적으로 포스트를 수정했습니다.`,
+                    status: "success",
+                });
+            return res.status(400).send({
                 data: null,
                 message: `포스트를 수정하는데 실패했습니다.`,
                 status: "success",
             });
         }
+        res.status(200).send({
+            data: {
+                aiResult,
+            },
+            message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+            status: "success",
+        });
     }
     catch (err) {
         res.status(500).send({
@@ -221,7 +220,10 @@ const getPostList = async (req, res, filter) => {
         const filterOb = typeof filter === "object" ? filter : {};
         const search = keyword
             ? {
-                $or: [{ title: { $regex: keyword, $options: "i" } }],
+                $or: [
+                    { title: { $regex: keyword, $options: "i" } },
+                    { description: { $regex: keyword, $options: "i" } },
+                ],
             }
             : filterOb;
         const orderQuery = req.query.order;
