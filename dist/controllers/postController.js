@@ -102,7 +102,8 @@ const createPost = async (req, res) => {
     try {
         const { title, contents, detail, previewImage, authorId, description } = req.body;
         const aiResult = await (0, verifyContents_1.default)(title, detail);
-        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true") {
+        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true" ||
+            (aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "참") {
             const _id = await (0, uniqueIdGenerator_1.default)(Post_1.default, 10);
             const newPost = new Post_1.default({
                 _id,
@@ -119,14 +120,16 @@ const createPost = async (req, res) => {
             const result = await newPost.save();
             if (result && result._id)
                 return res.status(200).send({
-                    data: null,
+                    data: {
+                        id: result._id,
+                    },
                     message: `새로운 포스트를 생성했습니다. id:${_id}`,
                     status: "success",
                 });
             return res.status(400).send({
                 data: null,
                 message: `새로운 포스트를 생성하는데 실패했습니다.`,
-                status: "success",
+                status: "error",
             });
         }
         res.status(200).send({
@@ -134,7 +137,7 @@ const createPost = async (req, res) => {
                 aiResult,
             },
             message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
-            status: "success",
+            status: "error",
         });
     }
     catch (err) {
@@ -151,18 +154,28 @@ const updatePost = async (req, res) => {
     try {
         const { title, contents, previewImage, detail, description } = req.body;
         const aiResult = await (0, verifyContents_1.default)(title, detail);
-        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true") {
-            const result = await Post_1.default.updateOne({ _id: req.params.id }, { $set: { title, contents, previewImage, description } });
+        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true" ||
+            (aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "참") {
+            const result = await Post_1.default.updateOne({ _id: req.params.id }, {
+                $set: {
+                    title,
+                    contents: (0, zipString_1.compressString)(contents),
+                    previewImage,
+                    description,
+                },
+            });
             if (result.modifiedCount === 1)
                 return res.status(200).send({
-                    data: null,
+                    data: {
+                        id: req.params.id,
+                    },
                     message: `성공적으로 포스트를 수정했습니다.`,
                     status: "success",
                 });
             return res.status(400).send({
                 data: null,
                 message: `포스트를 수정하는데 실패했습니다.`,
-                status: "success",
+                status: "error",
             });
         }
         res.status(200).send({
@@ -170,7 +183,7 @@ const updatePost = async (req, res) => {
                 aiResult,
             },
             message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
-            status: "success",
+            status: "error",
         });
     }
     catch (err) {

@@ -126,7 +126,10 @@ export const createPost = async (
 
     const aiResult = await verifyContents(title, detail);
 
-    if (aiResult?.toLowerCase() === "true") {
+    if (
+      aiResult?.toLowerCase() === "true" ||
+      aiResult?.toLowerCase() === "참"
+    ) {
       const _id = await generateUID(Post, 10);
 
       const newPost = new Post({
@@ -146,7 +149,9 @@ export const createPost = async (
 
       if (result && result._id)
         return res.status(200).send({
-          data: null,
+          data: {
+            id: result._id,
+          },
           message: `새로운 포스트를 생성했습니다. id:${_id}`,
           status: "success",
         });
@@ -154,7 +159,7 @@ export const createPost = async (
       return res.status(400).send({
         data: null,
         message: `새로운 포스트를 생성하는데 실패했습니다.`,
-        status: "success",
+        status: "error",
       });
     }
 
@@ -163,7 +168,7 @@ export const createPost = async (
         aiResult,
       },
       message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
-      status: "success",
+      status: "error",
     });
   } catch (err) {
     console.log(err);
@@ -192,21 +197,33 @@ export const updatePost = async (
     const { title, contents, previewImage, detail, description } = req.body;
 
     const aiResult = await verifyContents(title, detail);
-    if (aiResult?.toLowerCase() === "true") {
+    if (
+      aiResult?.toLowerCase() === "true" ||
+      aiResult?.toLowerCase() === "참"
+    ) {
       const result = await Post.updateOne(
         { _id: req.params.id },
-        { $set: { title, contents, previewImage, description } }
+        {
+          $set: {
+            title,
+            contents: compressString(contents),
+            previewImage,
+            description,
+          },
+        }
       );
       if (result.modifiedCount === 1)
         return res.status(200).send({
-          data: null,
+          data: {
+            id: req.params.id,
+          },
           message: `성공적으로 포스트를 수정했습니다.`,
           status: "success",
         });
       return res.status(400).send({
         data: null,
         message: `포스트를 수정하는데 실패했습니다.`,
-        status: "success",
+        status: "error",
       });
     }
 
@@ -215,7 +232,7 @@ export const updatePost = async (
         aiResult,
       },
       message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
-      status: "success",
+      status: "error",
     });
   } catch (err) {
     res.status(500).send({
