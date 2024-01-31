@@ -31,11 +31,7 @@ const postSchema = new mongoose_1.default.Schema({
     },
     bookmarkCount: {
         type: Number,
-    },
-    aiTestResult: {
-        type: Boolean,
-        required: true,
-    },
+    }
 }, { timestamps: true });
 postSchema.methods.toggleLike = function (userId) {
     const index = this.likes.indexOf(userId);

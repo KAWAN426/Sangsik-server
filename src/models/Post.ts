@@ -47,11 +47,7 @@ const postSchema = new mongoose.Schema(
     },
     bookmarkCount: {
       type: Number,
-    },
-    aiTestResult: {
-      type: Boolean,
-      required: true,
-    },
+    }
   },
   { timestamps: true }
 );
