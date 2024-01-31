@@ -3,11 +3,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const _1 = tslib_1.__importDefault(require("."));
 const verifyContents = async (title, detail) => {
-    const test1 = await aiTest(title, detail);
-    if ((test1 === null || test1 === void 0 ? void 0 : test1.toLowerCase()) === "true" || (test1 === null || test1 === void 0 ? void 0 : test1.toLowerCase()) === "참")
-        return test1;
-    const test2 = await aiTest(title, detail);
-    return test2;
+    const result = await aiTest(title, detail);
+    if ((result === null || result === void 0 ? void 0 : result.toLowerCase()) === "true" ||
+        (result === null || result === void 0 ? void 0 : result.toLowerCase()) === "참" ||
+        (result === null || result === void 0 ? void 0 : result.toLowerCase()) === "정확합니다.")
+        return {
+            status: true,
+            message: undefined,
+        };
+    return {
+        status: false,
+        message: result,
+    };
 };
 const aiTest = async (title, detail) => {
     const q = `title: ${title}, contents: ${detail}}`;

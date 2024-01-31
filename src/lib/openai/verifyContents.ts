@@ -1,13 +1,23 @@
 import openai from ".";
 
-const verifyContents = async (title: string, detail: string) => {
-  const test1 = await aiTest(title, detail);
-  if (test1?.toLowerCase() === "true" || test1?.toLowerCase() === "참")
-    return test1;
-
-  const test2 = await aiTest(title, detail);
-
-  return test2;
+const verifyContents = async (
+  title: string,
+  detail: string
+): Promise<{ status: boolean; message?: string }> => {
+  const result = await aiTest(title, detail);
+  if (
+    result?.toLowerCase() === "true" ||
+    result?.toLowerCase() === "참" ||
+    result?.toLowerCase() === "정확합니다."
+  )
+    return {
+      status: true,
+      message: undefined,
+    };
+  return {
+    status: false,
+    message: result,
+  };
 };
 
 const aiTest = async (title: string, detail: string) => {

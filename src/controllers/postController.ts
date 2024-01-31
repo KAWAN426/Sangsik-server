@@ -122,12 +122,9 @@ export const createPost = async (
     const { title, contents, detail, previewImage, authorId, description } =
       req.body;
 
-    const aiResult = await verifyContents(title, detail);
+    const { status, message } = await verifyContents(title, detail);
 
-    if (
-      aiResult?.toLowerCase() === "true" ||
-      aiResult?.toLowerCase() === "참"
-    ) {
+    if (status) {
       const _id = await generateUID(Post, 10);
 
       const newPost = new Post({
@@ -163,9 +160,9 @@ export const createPost = async (
 
     res.status(200).send({
       data: {
-        aiResult,
+        aiResult: message,
       },
-      message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+      message: `AI검사 과정에서 실패했습니다.`,
       status: "error",
     });
   } catch (err) {
@@ -194,11 +191,9 @@ export const updatePost = async (
   try {
     const { title, contents, previewImage, detail, description } = req.body;
 
-    const aiResult = await verifyContents(title, detail);
-    if (
-      aiResult?.toLowerCase() === "true" ||
-      aiResult?.toLowerCase() === "참"
-    ) {
+    const { status, message } = await verifyContents(title, detail);
+
+    if (status) {
       const result = await Post.updateOne(
         { _id: req.params.id },
         {
@@ -227,9 +222,9 @@ export const updatePost = async (
 
     res.status(200).send({
       data: {
-        aiResult,
+        aiResult: message,
       },
-      message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+      message: `AI검사 과정에서 실패했습니다.`,
       status: "error",
     });
   } catch (err) {

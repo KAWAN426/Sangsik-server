@@ -101,9 +101,8 @@ exports.togglePostBookmark = togglePostBookmark;
 const createPost = async (req, res) => {
     try {
         const { title, contents, detail, previewImage, authorId, description } = req.body;
-        const aiResult = await (0, verifyContents_1.default)(title, detail);
-        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true" ||
-            (aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "참") {
+        const { status, message } = await (0, verifyContents_1.default)(title, detail);
+        if (status) {
             const _id = await (0, uniqueIdGenerator_1.default)(Post_1.default, 10);
             const newPost = new Post_1.default({
                 _id,
@@ -134,9 +133,9 @@ const createPost = async (req, res) => {
         }
         res.status(200).send({
             data: {
-                aiResult,
+                aiResult: message,
             },
-            message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+            message: `AI검사 과정에서 실패했습니다.`,
             status: "error",
         });
     }
@@ -153,9 +152,8 @@ exports.createPost = createPost;
 const updatePost = async (req, res) => {
     try {
         const { title, contents, previewImage, detail, description } = req.body;
-        const aiResult = await (0, verifyContents_1.default)(title, detail);
-        if ((aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "true" ||
-            (aiResult === null || aiResult === void 0 ? void 0 : aiResult.toLowerCase()) === "참") {
+        const { status, message } = await (0, verifyContents_1.default)(title, detail);
+        if (status) {
             const result = await Post_1.default.updateOne({ _id: req.params.id }, {
                 $set: {
                     title,
@@ -180,9 +178,9 @@ const updatePost = async (req, res) => {
         }
         res.status(200).send({
             data: {
-                aiResult,
+                aiResult: message,
             },
-            message: `새로운 포스트를 생성하는데 AI검사 과정에서 실패했습니다.`,
+            message: `AI검사 과정에서 실패했습니다.`,
             status: "error",
         });
     }
