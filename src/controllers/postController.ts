@@ -1,4 +1,3 @@
-import openai from "@/lib/openai";
 import verifyContents from "@/lib/openai/verifyContents";
 import Post from "@/models/Post";
 import Report from "@/models/Report";
@@ -6,7 +5,6 @@ import User from "@/models/User";
 import { TypedRequest, TypedResponse } from "@/types/express";
 import generateUID from "@/utils/uniqueIdGenerator";
 import { compressString } from "@/utils/zipString";
-// import cheerio from "cheerio";
 import { SortOrder } from "mongoose";
 
 export const getPostOne = async (req: TypedRequest, res: TypedResponse) => {
